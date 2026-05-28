@@ -51,8 +51,8 @@ export function ProdutoDialog({ open, onOpenChange, produto, onSalvo }: Props) {
     }
   }, [open, produto])
 
-  const set = (field: string, value: string | boolean) =>
-    setForm(prev => ({ ...prev, [field]: value }))
+  const set = (field: string, value: string | boolean | null) =>
+    setForm(prev => ({ ...prev, [field]: value ?? '' }))
 
   const salvar = async () => {
     if (!form.nome.trim() || !form.preco || !form.categoriaId) return
