@@ -1,7 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { useEffect, useRef, useState } from 'react'
+import { ImagePlus, X } from 'lucide-react'
+import {
+  Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter,
+} from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -28,10 +31,33 @@ interface Props {
   onSalvo?: () => void
 }
 
+function compressImage(file: File): Promise<string> {
+  return new Promise(resolve => {
+    const reader = new FileReader()
+    reader.onload = e => {
+      const img = new Image()
+      img.onload = () => {
+        const maxW = 600
+        const ratio = Math.min(maxW / img.width, 1)
+        const canvas = document.createElement('canvas')
+        canvas.width = Math.round(img.width * ratio)
+        canvas.height = Math.round(img.height * ratio)
+        canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height)
+        resolve(canvas.toDataURL('image/jpeg', 0.82))
+      }
+      img.src = e.target!.result as string
+    }
+    reader.readAsDataURL(file)
+  })
+}
+
 export function ProdutoDialog({ open, onOpenChange, produto, onSalvo }: Props) {
-  const [form, setForm] = useState({ nome: '', descricao: '', preco: '', imagem: '', categoriaId: '', disponivel: true })
+  const [form, setForm] = useState({
+    nome: '', descricao: '', preco: '', imagem: '', categoriaId: '', disponivel: true,
+  })
   const [categorias, setCategorias] = useState<Categoria[]>([])
   const [salvando, setSalvando] = useState(false)
+  const fileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/categorias`)
@@ -53,6 +79,14 @@ export function ProdutoDialog({ open, onOpenChange, produto, onSalvo }: Props) {
 
   const set = (field: string, value: string | boolean | null) =>
     setForm(prev => ({ ...prev, [field]: value ?? '' }))
+
+  const handleFoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const base64 = await compressImage(file)
+    set('imagem', base64)
+    e.target.value = ''
+  }
 
   const salvar = async () => {
     if (!form.nome.trim() || !form.preco || !form.categoriaId) return
@@ -80,39 +114,101 @@ export function ProdutoDialog({ open, onOpenChange, produto, onSalvo }: Props) {
   const canSave = form.nome.trim() && form.preco && form.categoriaId
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-zinc-900 border-zinc-800 text-white max-w-md">
-        <DialogHeader>
-          <DialogTitle>{produto?.id ? 'Editar Produto' : 'Novo Produto'}</DialogTitle>
-        </DialogHeader>
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="bg-zinc-950 border-zinc-800 text-white flex flex-col p-0 w-full sm:max-w-sm">
+        <SheetHeader className="p-5 border-b border-zinc-800">
+          <SheetTitle className="text-white text-base font-semibold">
+            {produto?.id ? 'Editar Produto' : 'Novo Produto'}
+          </SheetTitle>
+        </SheetHeader>
 
-        <div className="space-y-4 py-2">
+        <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
+          {/* Foto */}
           <div className="space-y-2">
-            <Label>Nome *</Label>
-            <Input value={form.nome} onChange={e => set('nome', e.target.value)}
-              placeholder="Ex: Smash Clássico" className="bg-zinc-800 border-zinc-700 text-white" />
+            <Label className="text-zinc-400 text-xs">Foto do produto</Label>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={handleFoto}
+            />
+            {form.imagem ? (
+              <div className="relative rounded-xl overflow-hidden bg-zinc-800 aspect-video">
+                <img src={form.imagem} alt="Preview" className="w-full h-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => set('imagem', '')}
+                  className="absolute top-2 right-2 h-7 w-7 rounded-full bg-black/60 flex items-center justify-center hover:bg-black/80 transition-colors"
+                >
+                  <X className="h-3.5 w-3.5 text-white" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => fileRef.current?.click()}
+                  className="absolute bottom-2 right-2 text-xs bg-black/60 text-white px-3 py-1.5 rounded-full hover:bg-black/80 transition-colors"
+                >
+                  Trocar foto
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                className="w-full aspect-video rounded-xl border-2 border-dashed border-zinc-700 hover:border-orange-500/50 bg-zinc-900 flex flex-col items-center justify-center gap-2 transition-colors group"
+              >
+                <ImagePlus className="h-7 w-7 text-zinc-600 group-hover:text-orange-500 transition-colors" />
+                <span className="text-xs text-zinc-500 group-hover:text-zinc-300">
+                  Toque para adicionar foto
+                </span>
+                <span className="text-xs text-zinc-700">câmera ou galeria</span>
+              </button>
+            )}
           </div>
 
-          <div className="space-y-2">
-            <Label>Descrição</Label>
-            <Textarea value={form.descricao} onChange={e => set('descricao', e.target.value)}
-              placeholder="Ingredientes, diferenciais..." rows={2}
-              className="bg-zinc-800 border-zinc-700 text-white resize-none" />
+          {/* Nome */}
+          <div className="space-y-1.5">
+            <Label className="text-zinc-400 text-xs">Nome *</Label>
+            <Input
+              value={form.nome}
+              onChange={e => set('nome', e.target.value)}
+              placeholder="Ex: Smash Clássico"
+              className="bg-zinc-900 border-zinc-700 text-white h-10"
+            />
           </div>
 
+          {/* Descrição */}
+          <div className="space-y-1.5">
+            <Label className="text-zinc-400 text-xs">Descrição</Label>
+            <Textarea
+              value={form.descricao}
+              onChange={e => set('descricao', e.target.value)}
+              placeholder="Ingredientes, diferenciais..."
+              rows={2}
+              className="bg-zinc-900 border-zinc-700 text-white resize-none"
+            />
+          </div>
+
+          {/* Preço + Categoria */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label>Preço (R$) *</Label>
-              <Input value={form.preco} onChange={e => set('preco', e.target.value)}
-                placeholder="0,00" className="bg-zinc-800 border-zinc-700 text-white" />
+            <div className="space-y-1.5">
+              <Label className="text-zinc-400 text-xs">Preço (R$) *</Label>
+              <Input
+                value={form.preco}
+                onChange={e => set('preco', e.target.value)}
+                placeholder="0,00"
+                inputMode="decimal"
+                className="bg-zinc-900 border-zinc-700 text-white h-10"
+              />
             </div>
-            <div className="space-y-2">
-              <Label>Categoria *</Label>
+            <div className="space-y-1.5">
+              <Label className="text-zinc-400 text-xs">Categoria *</Label>
               <Select value={form.categoriaId} onValueChange={v => set('categoriaId', v)}>
-                <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
+                <SelectTrigger className="bg-zinc-900 border-zinc-700 text-white h-10">
                   <SelectValue placeholder="Selecionar" />
                 </SelectTrigger>
-                <SelectContent className="bg-zinc-800 border-zinc-700">
+                <SelectContent className="bg-zinc-900 border-zinc-700">
                   {categorias.map(c => (
                     <SelectItem key={c.id} value={c.id} className="text-white">{c.nome}</SelectItem>
                   ))}
@@ -121,28 +217,37 @@ export function ProdutoDialog({ open, onOpenChange, produto, onSalvo }: Props) {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label>URL da foto</Label>
-            <Input value={form.imagem} onChange={e => set('imagem', e.target.value)}
-              placeholder="https://..." className="bg-zinc-800 border-zinc-700 text-white" />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <Label>Disponível no cardápio</Label>
-            <Switch checked={form.disponivel} onCheckedChange={v => set('disponivel', v)} />
+          {/* Disponível */}
+          <div className="flex items-center justify-between py-1">
+            <div>
+              <p className="text-sm font-medium">Disponível no cardápio</p>
+              <p className="text-xs text-zinc-500">Visível para os clientes</p>
+            </div>
+            <Switch
+              checked={form.disponivel}
+              onCheckedChange={v => set('disponivel', v)}
+              className="data-[state=checked]:bg-green-500"
+            />
           </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)} className="text-zinc-400">
+        <SheetFooter className="px-5 py-4 border-t border-zinc-800 gap-3">
+          <Button
+            variant="ghost"
+            onClick={() => onOpenChange(false)}
+            className="flex-1 text-zinc-400 hover:text-white border border-zinc-800"
+          >
             Cancelar
           </Button>
-          <Button onClick={salvar} disabled={salvando || !canSave}
-            className="bg-orange-500 hover:bg-orange-600 text-white">
+          <Button
+            onClick={salvar}
+            disabled={salvando || !canSave}
+            className="flex-1 bg-orange-500 hover:bg-orange-600 text-white"
+          >
             {salvando ? 'Salvando...' : 'Salvar'}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   )
 }

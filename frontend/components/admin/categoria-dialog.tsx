@@ -1,7 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import {
+  Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter,
+} from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -50,39 +52,56 @@ export function CategoriaDialog({ open, onOpenChange, categoria, onSalvo }: Prop
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-zinc-900 border-zinc-800 text-white">
-        <DialogHeader>
-          <DialogTitle>{categoria?.id ? 'Editar Categoria' : 'Nova Categoria'}</DialogTitle>
-        </DialogHeader>
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="bg-zinc-950 border-zinc-800 text-white flex flex-col p-0 w-full sm:max-w-sm">
+        <SheetHeader className="p-5 border-b border-zinc-800">
+          <SheetTitle className="text-white text-base font-semibold">
+            {categoria?.id ? 'Editar Categoria' : 'Nova Categoria'}
+          </SheetTitle>
+        </SheetHeader>
 
-        <div className="space-y-4 py-2">
-          <div className="space-y-2">
-            <Label>Nome</Label>
+        <div className="flex-1 px-5 py-5 space-y-5">
+          <div className="space-y-1.5">
+            <Label className="text-zinc-400 text-xs">Nome</Label>
             <Input
               value={nome}
-              onChange={(e) => setNome(e.target.value)}
+              onChange={e => setNome(e.target.value)}
               placeholder="Ex: Burgers, Bebidas, Sobremesas..."
-              className="bg-zinc-800 border-zinc-700 text-white"
-              onKeyDown={(e) => e.key === 'Enter' && salvar()}
+              className="bg-zinc-900 border-zinc-700 text-white h-10"
+              onKeyDown={e => e.key === 'Enter' && salvar()}
             />
           </div>
-          <div className="flex items-center justify-between">
-            <Label>Ativa no cardápio</Label>
-            <Switch checked={ativa} onCheckedChange={setAtiva} />
+
+          <div className="flex items-center justify-between py-1">
+            <div>
+              <p className="text-sm font-medium">Ativa no cardápio</p>
+              <p className="text-xs text-zinc-500">Visível para os clientes</p>
+            </div>
+            <Switch
+              checked={ativa}
+              onCheckedChange={setAtiva}
+              className="data-[state=checked]:bg-green-500"
+            />
           </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)} className="text-zinc-400">
+        <SheetFooter className="px-5 py-4 border-t border-zinc-800 gap-3">
+          <Button
+            variant="ghost"
+            onClick={() => onOpenChange(false)}
+            className="flex-1 text-zinc-400 hover:text-white border border-zinc-800"
+          >
             Cancelar
           </Button>
-          <Button onClick={salvar} disabled={salvando || !nome.trim()}
-            className="bg-orange-500 hover:bg-orange-600 text-white">
+          <Button
+            onClick={salvar}
+            disabled={salvando || !nome.trim()}
+            className="flex-1 bg-orange-500 hover:bg-orange-600 text-white"
+          >
             {salvando ? 'Salvando...' : 'Salvar'}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   )
 }
