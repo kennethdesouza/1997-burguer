@@ -21,8 +21,8 @@ export default function CategoriasPage() {
           className="bg-orange-500 hover:bg-orange-600 text-white"
           onClick={() => setOpen(true)}
         >
-          <Plus className="h-4 w-4 mr-1.5" />
-          Nova Categoria
+          <Plus className="h-4 w-4" />
+          <span className="hidden sm:inline ml-1.5">Nova Categoria</span>
         </Button>
       </div>
 
