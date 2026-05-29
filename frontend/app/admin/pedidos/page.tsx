@@ -26,7 +26,7 @@ interface Pedido {
   createdAt: string
 }
 
-const fmtBRL = (v: number) => `R$ ${Number(v).toFixed(2).replace('.', ',')}`
+import { fmtBRL } from '@/lib/utils'
 
 const METODO_LABEL: Record<string, string> = {
   PIX: 'PIX',

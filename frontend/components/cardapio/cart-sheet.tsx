@@ -14,9 +14,9 @@ import {
   SheetFooter,
 } from '@/components/ui/sheet'
 
-const API = '/api'
+import { fmtBRL } from '@/lib/utils'
 
-const fmtBRL = (v: number) => `R$ ${v.toFixed(2).replace('.', ',')}`
+const API = '/api'
 
 const METODOS = [
   { id: 'PIX', label: 'PIX' },

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Switch } from '@/components/ui/switch'
+import { fmtBRL } from '@/lib/utils'
 import { ProdutoDialog } from './produto-dialog'
 
 interface Produto {
@@ -17,8 +18,6 @@ interface Produto {
   disponivel: boolean
   categoria: { id: string; nome: string }
 }
-
-const fmtPreco = (v: number) => `R$ ${Number(v).toFixed(2).replace('.', ',')}`
 
 export function ProdutosList({ onNovo }: { onNovo: () => void }) {
   const [produtos, setProdutos] = useState<Produto[]>([])
@@ -86,7 +85,7 @@ export function ProdutosList({ onNovo }: { onNovo: () => void }) {
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">{produto.nome}</p>
               <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="text-orange-400 text-xs font-semibold">{fmtPreco(produto.preco)}</span>
+                <span className="text-orange-400 text-xs font-semibold">{fmtBRL(produto.preco)}</span>
                 <span className="text-zinc-700 text-xs">·</span>
                 <span className="text-zinc-500 text-xs truncate">{produto.categoria?.nome}</span>
               </div>

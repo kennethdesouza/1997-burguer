@@ -28,8 +28,9 @@ interface Categoria {
   produtos: Produto[]
 }
 
+import { fmtBRL } from '@/lib/utils'
+
 const API = '/api'
-const fmtBRL = (v: number) => `R$ ${Number(v).toFixed(2).replace('.', ',')}`
 
 export default function CardapioPage() {
   const [categorias, setCategorias] = useState<Categoria[]>([])
