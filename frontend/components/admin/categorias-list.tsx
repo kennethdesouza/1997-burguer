@@ -1,11 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Pencil, Trash2, GripVertical } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
+import { Pencil, Trash2, Tag } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Switch } from '@/components/ui/switch'
 import { CategoriaDialog } from './categoria-dialog'
 
 interface Categoria {
@@ -23,7 +23,7 @@ export function CategoriasList({ onNova }: { onNova: () => void }) {
 
   const fetchCategorias = async () => {
     try {
-      const res = await fetch(`${'/api'}/categorias`)
+      const res = await fetch('/api/categorias')
       const data = await res.json()
       setCategorias(Array.isArray(data) ? data : [])
     } catch {
@@ -35,15 +35,24 @@ export function CategoriasList({ onNova }: { onNova: () => void }) {
 
   useEffect(() => { fetchCategorias() }, [])
 
+  const toggleAtiva = async (id: string, ativa: boolean) => {
+    await fetch(`/api/categorias/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ativa }),
+    })
+    setCategorias(prev => prev.map(c => c.id === id ? { ...c, ativa } : c))
+  }
+
   const deletar = async (id: string) => {
     if (!confirm('Deletar categoria?')) return
-    await fetch(`${'/api'}/categorias/${id}`, { method: 'DELETE' })
+    await fetch(`/api/categorias/${id}`, { method: 'DELETE' })
     fetchCategorias()
   }
 
   if (loading) return (
-    <div className="space-y-3">
-      {[1,2,3].map(i => <Skeleton key={i} className="h-16 w-full bg-zinc-800" />)}
+    <div className="space-y-2">
+      {[1, 2, 3].map(i => <Skeleton key={i} className="h-14 w-full bg-zinc-800 rounded-xl" />)}
     </div>
   )
 
@@ -58,37 +67,53 @@ export function CategoriasList({ onNova }: { onNova: () => void }) {
 
   return (
     <>
-      <div className="space-y-2">
-        {categorias.map((cat) => (
-          <Card key={cat.id} className="bg-zinc-900 border-zinc-800 px-4 py-3 flex items-center gap-4">
-            <GripVertical className="h-4 w-4 text-zinc-600 cursor-grab" />
-            <div className="flex-1">
-              <span className="font-medium">{cat.nome}</span>
-              <span className="text-zinc-500 text-sm ml-3">
-                {cat._count?.produtos ?? 0} produto{(cat._count?.produtos ?? 0) !== 1 ? 's' : ''}
-              </span>
+      <Card className="bg-zinc-900 border-zinc-800 divide-y divide-zinc-800">
+        {categorias.map(cat => (
+          <div key={cat.id} className="flex items-center gap-3 px-4 py-3">
+            {/* Ícone */}
+            <div className="h-8 w-8 rounded-lg bg-orange-500/10 flex items-center justify-center flex-shrink-0">
+              <Tag className="h-3.5 w-3.5 text-orange-400" />
             </div>
-            <Badge variant={cat.ativa ? 'default' : 'secondary'}
-              className={cat.ativa ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-zinc-800 text-zinc-500'}>
-              {cat.ativa ? 'Ativa' : 'Inativa'}
-            </Badge>
+
+            {/* Nome + contagem */}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium">{cat.nome}</p>
+              <p className="text-xs text-zinc-500 mt-0.5">
+                {cat._count?.produtos ?? 0} produto{(cat._count?.produtos ?? 0) !== 1 ? 's' : ''}
+              </p>
+            </div>
+
+            {/* Toggle ativa */}
+            <Switch
+              checked={cat.ativa}
+              onCheckedChange={v => toggleAtiva(cat.id, v)}
+              className="data-[state=checked]:bg-green-500"
+            />
+
+            {/* Ações */}
             <div className="flex gap-1">
-              <Button size="icon" variant="ghost" className="h-8 w-8 text-zinc-400 hover:text-white"
-                onClick={() => setEditando(cat)}>
+              <Button
+                size="icon" variant="ghost"
+                className="h-8 w-8 text-zinc-400 hover:text-white"
+                onClick={() => setEditando(cat)}
+              >
                 <Pencil className="h-3.5 w-3.5" />
               </Button>
-              <Button size="icon" variant="ghost" className="h-8 w-8 text-zinc-400 hover:text-red-400"
-                onClick={() => deletar(cat.id)}>
+              <Button
+                size="icon" variant="ghost"
+                className="h-8 w-8 text-zinc-400 hover:text-red-400"
+                onClick={() => deletar(cat.id)}
+              >
                 <Trash2 className="h-3.5 w-3.5" />
               </Button>
             </div>
-          </Card>
+          </div>
         ))}
-      </div>
+      </Card>
 
       <CategoriaDialog
         open={!!editando}
-        onOpenChange={(open) => !open && setEditando(null)}
+        onOpenChange={open => !open && setEditando(null)}
         categoria={editando ?? undefined}
         onSalvo={fetchCategorias}
       />
