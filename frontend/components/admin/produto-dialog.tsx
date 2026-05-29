@@ -79,7 +79,7 @@ export function ProdutoDialog({ open, onOpenChange, produto, onSalvo }: Props) {
       setForm({
         nome: produto?.nome ?? '',
         descricao: produto?.descricao ?? '',
-        preco: produto?.preco ? String(produto.preco) : '',
+        preco: produto?.preco ? Number(produto.preco).toFixed(2).replace('.', ',') : '',
         imagem: produto?.imagem ?? '',
         categoriaId: produto?.categoriaId ?? produto?.categoria?.id ?? '',
         disponivel: produto?.disponivel ?? true,
@@ -89,6 +89,13 @@ export function ProdutoDialog({ open, onOpenChange, produto, onSalvo }: Props) {
 
   const set = (field: string, value: string | boolean | null) =>
     setForm(prev => ({ ...prev, [field]: value ?? '' }))
+
+  const handlePreco = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const digits = e.target.value.replace(/\D/g, '')
+    if (!digits) { set('preco', ''); return }
+    const cents = parseInt(digits, 10)
+    set('preco', (cents / 100).toFixed(2).replace('.', ','))
+  }
 
   const handleFoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -240,13 +247,16 @@ export function ProdutoDialog({ open, onOpenChange, produto, onSalvo }: Props) {
           {/* Preço */}
           <div className="space-y-1.5">
             <Label className="text-zinc-400 text-xs">Preço (R$) *</Label>
-            <Input
-              value={form.preco}
-              onChange={e => set('preco', e.target.value)}
-              placeholder="0,00"
-              inputMode="decimal"
-              className="bg-zinc-900 border-zinc-700 text-white h-10"
-            />
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 text-sm pointer-events-none">R$</span>
+              <Input
+                value={form.preco}
+                onChange={handlePreco}
+                placeholder="0,00"
+                inputMode="numeric"
+                className="bg-zinc-900 border-zinc-700 text-white h-10 pl-9"
+              />
+            </div>
           </div>
 
           {/* Disponível */}
