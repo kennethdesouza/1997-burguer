@@ -9,6 +9,7 @@ import { CardapioSubNav } from '@/components/admin/cardapio-subnav'
 
 export default function CategoriasPage() {
   const [open, setOpen] = useState(false)
+  const [refreshKey, setRefreshKey] = useState(0)
 
   return (
     <div>
@@ -28,8 +29,12 @@ export default function CategoriasPage() {
 
       <CardapioSubNav />
 
-      <CategoriasList onNova={() => setOpen(true)} />
-      <CategoriaDialog open={open} onOpenChange={setOpen} />
+      <CategoriasList key={refreshKey} onNova={() => setOpen(true)} />
+      <CategoriaDialog
+        open={open}
+        onOpenChange={setOpen}
+        onSalvo={() => setRefreshKey(k => k + 1)}
+      />
     </div>
   )
 }
