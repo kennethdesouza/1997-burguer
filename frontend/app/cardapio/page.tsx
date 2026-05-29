@@ -28,7 +28,7 @@ interface Categoria {
   produtos: Produto[]
 }
 
-const API = process.env.NEXT_PUBLIC_API_URL
+const API = '/api'
 const fmtBRL = (v: number) => `R$ ${Number(v).toFixed(2).replace('.', ',')}`
 
 export default function CardapioPage() {

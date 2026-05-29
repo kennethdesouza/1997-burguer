@@ -14,7 +14,7 @@ import {
   SheetFooter,
 } from '@/components/ui/sheet'
 
-const API = process.env.NEXT_PUBLIC_API_URL
+const API = '/api'
 
 const fmtBRL = (v: number) => `R$ ${v.toFixed(2).replace('.', ',')}`
 

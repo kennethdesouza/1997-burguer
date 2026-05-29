@@ -60,7 +60,7 @@ export function ProdutoDialog({ open, onOpenChange, produto, onSalvo }: Props) {
   const fileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/categorias`)
+    fetch(`${'/api'}/categorias`)
       .then(r => r.json()).then(setCategorias).catch(() => {})
   }, [])
 
@@ -92,8 +92,8 @@ export function ProdutoDialog({ open, onOpenChange, produto, onSalvo }: Props) {
     if (!form.nome.trim() || !form.preco || !form.categoriaId) return
     setSalvando(true)
     const url = produto?.id
-      ? `${process.env.NEXT_PUBLIC_API_URL}/produtos/${produto.id}`
-      : `${process.env.NEXT_PUBLIC_API_URL}/produtos`
+      ? `${'/api'}/produtos/${produto.id}`
+      : `${'/api'}/produtos`
     await fetch(url, {
       method: produto?.id ? 'PATCH' : 'POST',
       headers: { 'Content-Type': 'application/json' },

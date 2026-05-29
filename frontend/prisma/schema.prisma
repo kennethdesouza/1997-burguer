@@ -1,0 +1,139 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Usuario {
+  id        String   @id @default(cuid())
+  nome      String
+  email     String   @unique
+  senha     String
+  role      Role     @default(ADMIN)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Role {
+  ADMIN
+  COZINHA
+}
+
+model Categoria {
+  id        String    @id @default(cuid())
+  nome      String
+  ordem     Int       @default(0)
+  ativa     Boolean   @default(true)
+  produtos  Produto[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Produto {
+  id          String       @id @default(cuid())
+  nome        String
+  descricao   String?
+  preco       Decimal      @db.Decimal(10, 2)
+  imagem      String?
+  disponivel  Boolean      @default(true)
+  categoriaId String
+  categoria   Categoria    @relation(fields: [categoriaId], references: [id])
+  adicionais  Adicional[]
+  itensPedido ItemPedido[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Adicional {
+  id         String                @id @default(cuid())
+  nome       String
+  preco      Decimal               @db.Decimal(10, 2)
+  disponivel Boolean               @default(true)
+  produtos   Produto[]
+  itens      ItemPedidoAdicional[]
+  createdAt  DateTime              @default(now())
+  updatedAt  DateTime              @updatedAt
+}
+
+model Cliente {
+  id        String   @id @default(cuid())
+  nome      String
+  telefone  String?
+  email     String?
+  pedidos   Pedido[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Pedido {
+  id         String       @id @default(cuid())
+  numero     Int          @unique @default(autoincrement())
+  status     StatusPedido @default(PENDENTE)
+  total      Decimal      @db.Decimal(10, 2)
+  observacao String?
+  clienteId  String?
+  cliente    Cliente?     @relation(fields: [clienteId], references: [id])
+  itens      ItemPedido[]
+  pagamento  Pagamento?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+}
+
+enum StatusPedido {
+  PENDENTE
+  CONFIRMADO
+  PREPARANDO
+  PRONTO
+  ENTREGUE
+  CANCELADO
+}
+
+model ItemPedido {
+  id         String                @id @default(cuid())
+  quantidade Int
+  precoUnit  Decimal               @db.Decimal(10, 2)
+  observacao String?
+  pedidoId   String
+  pedido     Pedido                @relation(fields: [pedidoId], references: [id])
+  produtoId  String
+  produto    Produto               @relation(fields: [produtoId], references: [id])
+  adicionais ItemPedidoAdicional[]
+  createdAt  DateTime              @default(now())
+}
+
+model ItemPedidoAdicional {
+  id           String     @id @default(cuid())
+  itemPedidoId String
+  itemPedido   ItemPedido @relation(fields: [itemPedidoId], references: [id])
+  adicionalId  String
+  adicional    Adicional  @relation(fields: [adicionalId], references: [id])
+  preco        Decimal    @db.Decimal(10, 2)
+}
+
+model Pagamento {
+  id          String          @id @default(cuid())
+  pedidoId    String          @unique
+  pedido      Pedido          @relation(fields: [pedidoId], references: [id])
+  metodo      MetodoPagamento
+  status      StatusPagamento @default(PENDENTE)
+  valor       Decimal         @db.Decimal(10, 2)
+  mpPaymentId String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+}
+
+enum MetodoPagamento {
+  PIX
+  CARTAO_CREDITO
+  CARTAO_DEBITO
+  DINHEIRO
+}
+
+enum StatusPagamento {
+  PENDENTE
+  APROVADO
+  RECUSADO
+  CANCELADO
+}

@@ -39,8 +39,8 @@ export function CategoriaDialog({ open, onOpenChange, categoria, onSalvo }: Prop
     if (!nome.trim()) return
     setSalvando(true)
     const url = categoria?.id
-      ? `${process.env.NEXT_PUBLIC_API_URL}/categorias/${categoria.id}`
-      : `${process.env.NEXT_PUBLIC_API_URL}/categorias`
+      ? `${'/api'}/categorias/${categoria.id}`
+      : `${'/api'}/categorias`
     await fetch(url, {
       method: categoria?.id ? 'PATCH' : 'POST',
       headers: { 'Content-Type': 'application/json' },

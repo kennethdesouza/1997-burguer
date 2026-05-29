@@ -23,7 +23,7 @@ export function CategoriasList({ onNova }: { onNova: () => void }) {
 
   const fetchCategorias = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/categorias`)
+      const res = await fetch(`${'/api'}/categorias`)
       const data = await res.json()
       setCategorias(data)
     } catch {
@@ -37,7 +37,7 @@ export function CategoriasList({ onNova }: { onNova: () => void }) {
 
   const deletar = async (id: string) => {
     if (!confirm('Deletar categoria?')) return
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/categorias/${id}`, { method: 'DELETE' })
+    await fetch(`${'/api'}/categorias/${id}`, { method: 'DELETE' })
     fetchCategorias()
   }
 

@@ -26,7 +26,7 @@ export function ProdutosList({ onNovo }: { onNovo: () => void }) {
 
   const fetchProdutos = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/produtos`)
+      const res = await fetch(`${'/api'}/produtos`)
       const data = await res.json()
       setProdutos(data)
     } catch {
@@ -39,7 +39,7 @@ export function ProdutosList({ onNovo }: { onNovo: () => void }) {
   useEffect(() => { fetchProdutos() }, [])
 
   const toggleDisponivel = async (id: string, disponivel: boolean) => {
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/produtos/${id}`, {
+    await fetch(`${'/api'}/produtos/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ disponivel }),
@@ -49,7 +49,7 @@ export function ProdutosList({ onNovo }: { onNovo: () => void }) {
 
   const deletar = async (id: string) => {
     if (!confirm('Deletar produto?')) return
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/produtos/${id}`, { method: 'DELETE' })
+    await fetch(`${'/api'}/produtos/${id}`, { method: 'DELETE' })
     fetchProdutos()
   }
 
