@@ -188,7 +188,10 @@ export function ProdutoDialog({ open, onOpenChange, produto, onSalvo }: Props) {
             <Label className="text-zinc-400 text-xs">Categoria *</Label>
             <Select value={form.categoriaId} onValueChange={v => set('categoriaId', v)}>
               <SelectTrigger className="bg-zinc-900 border-zinc-700 text-white h-10 w-full">
-                <SelectValue placeholder="Selecionar categoria" />
+                <span className="flex-1 text-sm text-left truncate">
+                  {categorias.find(c => c.id === form.categoriaId)?.nome
+                    ?? <span className="text-zinc-500">Selecionar categoria</span>}
+                </span>
               </SelectTrigger>
               <SelectContent className="bg-zinc-900 border-zinc-700">
                 {categorias.map(c => (
