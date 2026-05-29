@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { Pencil, Trash2, ImageOff } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -19,6 +18,8 @@ interface Produto {
   categoria: { id: string; nome: string }
 }
 
+const fmtPreco = (v: number) => `R$ ${Number(v).toFixed(2).replace('.', ',')}`
+
 export function ProdutosList({ onNovo }: { onNovo: () => void }) {
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [loading, setLoading] = useState(true)
@@ -26,7 +27,7 @@ export function ProdutosList({ onNovo }: { onNovo: () => void }) {
 
   const fetchProdutos = async () => {
     try {
-      const res = await fetch(`${'/api'}/produtos`)
+      const res = await fetch('/api/produtos')
       const data = await res.json()
       setProdutos(Array.isArray(data) ? data : [])
     } catch {
@@ -39,7 +40,7 @@ export function ProdutosList({ onNovo }: { onNovo: () => void }) {
   useEffect(() => { fetchProdutos() }, [])
 
   const toggleDisponivel = async (id: string, disponivel: boolean) => {
-    await fetch(`${'/api'}/produtos/${id}`, {
+    await fetch(`/api/produtos/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ disponivel }),
@@ -49,16 +50,13 @@ export function ProdutosList({ onNovo }: { onNovo: () => void }) {
 
   const deletar = async (id: string) => {
     if (!confirm('Deletar produto?')) return
-    await fetch(`${'/api'}/produtos/${id}`, { method: 'DELETE' })
+    await fetch(`/api/produtos/${id}`, { method: 'DELETE' })
     fetchProdutos()
   }
 
-  const fmtPreco = (v: number) =>
-    `R$ ${Number(v).toFixed(2).replace('.', ',')}`
-
   if (loading) return (
-    <div className="space-y-3">
-      {[1,2,3,4].map(i => <Skeleton key={i} className="h-20 w-full bg-zinc-800" />)}
+    <div className="space-y-2">
+      {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-14 w-full bg-zinc-800 rounded-xl" />)}
     </div>
   )
 
@@ -73,51 +71,58 @@ export function ProdutosList({ onNovo }: { onNovo: () => void }) {
 
   return (
     <>
-      <div className="space-y-2">
-        {produtos.map((produto) => (
-          <Card key={produto.id} className="bg-zinc-900 border-zinc-800 px-4 py-3 flex items-center gap-4">
-            <div className="h-12 w-12 rounded-lg bg-zinc-800 flex items-center justify-center flex-shrink-0 overflow-hidden">
+      <Card className="bg-zinc-900 border-zinc-800 divide-y divide-zinc-800">
+        {produtos.map(produto => (
+          <div key={produto.id} className="flex items-center gap-3 px-4 py-3">
+            {/* Foto / placeholder */}
+            <div className="h-10 w-10 rounded-lg bg-zinc-800 flex items-center justify-center flex-shrink-0 overflow-hidden">
               {produto.imagem
                 ? <img src={produto.imagem} alt={produto.nome} className="h-full w-full object-cover" />
-                : <ImageOff className="h-5 w-5 text-zinc-600" />
+                : <ImageOff className="h-4 w-4 text-zinc-600" />
               }
             </div>
+
+            {/* Nome + preço + categoria */}
             <div className="flex-1 min-w-0">
-              <p className="font-medium truncate">{produto.nome}</p>
-              <div className="flex items-center gap-2 mt-0.5">
-                <span className="text-orange-400 font-semibold text-sm">{fmtPreco(produto.preco)}</span>
-                <span className="text-zinc-600 text-xs">•</span>
-                <span className="text-zinc-500 text-xs">{produto.categoria?.nome}</span>
+              <p className="text-sm font-medium truncate">{produto.nome}</p>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className="text-orange-400 text-xs font-semibold">{fmtPreco(produto.preco)}</span>
+                <span className="text-zinc-700 text-xs">·</span>
+                <span className="text-zinc-500 text-xs truncate">{produto.categoria?.nome}</span>
               </div>
             </div>
+
+            {/* Toggle disponível */}
             <Switch
               checked={produto.disponivel}
-              onCheckedChange={(v) => toggleDisponivel(produto.id, v)}
+              onCheckedChange={v => toggleDisponivel(produto.id, v)}
               className="data-[state=checked]:bg-green-500"
             />
-            <Badge variant="outline"
-              className={produto.disponivel
-                ? 'border-green-500/30 text-green-400 text-xs'
-                : 'border-zinc-700 text-zinc-500 text-xs'}>
-              {produto.disponivel ? 'Disponível' : 'Indisponível'}
-            </Badge>
+
+            {/* Ações */}
             <div className="flex gap-1">
-              <Button size="icon" variant="ghost" className="h-8 w-8 text-zinc-400 hover:text-white"
-                onClick={() => setEditando(produto)}>
+              <Button
+                size="icon" variant="ghost"
+                className="h-8 w-8 text-zinc-400 hover:text-white"
+                onClick={() => setEditando(produto)}
+              >
                 <Pencil className="h-3.5 w-3.5" />
               </Button>
-              <Button size="icon" variant="ghost" className="h-8 w-8 text-zinc-400 hover:text-red-400"
-                onClick={() => deletar(produto.id)}>
+              <Button
+                size="icon" variant="ghost"
+                className="h-8 w-8 text-zinc-400 hover:text-red-400"
+                onClick={() => deletar(produto.id)}
+              >
                 <Trash2 className="h-3.5 w-3.5" />
               </Button>
             </div>
-          </Card>
+          </div>
         ))}
-      </div>
+      </Card>
 
       <ProdutoDialog
         open={!!editando}
-        onOpenChange={(open) => !open && setEditando(null)}
+        onOpenChange={open => !open && setEditando(null)}
         produto={editando ?? undefined}
         onSalvo={fetchProdutos}
       />
