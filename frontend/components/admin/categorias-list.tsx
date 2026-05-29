@@ -25,7 +25,7 @@ export function CategoriasList({ onNova }: { onNova: () => void }) {
     try {
       const res = await fetch(`${'/api'}/categorias`)
       const data = await res.json()
-      setCategorias(data)
+      setCategorias(Array.isArray(data) ? data : [])
     } catch {
       setCategorias([])
     } finally {

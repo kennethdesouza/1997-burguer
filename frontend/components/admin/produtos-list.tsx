@@ -28,7 +28,7 @@ export function ProdutosList({ onNovo }: { onNovo: () => void }) {
     try {
       const res = await fetch(`${'/api'}/produtos`)
       const data = await res.json()
-      setProdutos(data)
+      setProdutos(Array.isArray(data) ? data : [])
     } catch {
       setProdutos([])
     } finally {
