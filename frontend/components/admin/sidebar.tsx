@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useState, useEffect } from 'react'
 import {
   LayoutDashboard, UtensilsCrossed, ClipboardList,
   Settings, ChevronDown, Tag, Package,
@@ -23,6 +24,13 @@ const bottomLinks = [
 export function AdminSidebar() {
   const pathname = usePathname()
   const cardapioAtivo = pathname.startsWith('/admin/cardapio')
+
+  // Abre automaticamente se já estiver numa rota de cardápio
+  const [cardapioOpen, setCardapioOpen] = useState(cardapioAtivo)
+
+  useEffect(() => {
+    if (cardapioAtivo) setCardapioOpen(true)
+  }, [cardapioAtivo])
 
   const isActive = (href: string, exact: boolean) =>
     exact ? pathname === href : pathname.startsWith(href)
@@ -51,12 +59,13 @@ export function AdminSidebar() {
             Dashboard
           </Link>
 
-          {/* Cardápio — expansível */}
+          {/* Cardápio — botão que expande, não navega */}
           <div>
-            <Link
-              href="/admin/cardapio/produtos"
+            <button
+              type="button"
+              onClick={() => setCardapioOpen(prev => !prev)}
               className={cn(
-                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors w-full',
+                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors w-full text-left',
                 cardapioAtivo
                   ? 'bg-orange-500/10 text-orange-400'
                   : 'text-zinc-400 hover:bg-zinc-800 hover:text-white'
@@ -67,12 +76,12 @@ export function AdminSidebar() {
               <ChevronDown
                 className={cn(
                   'h-3.5 w-3.5 transition-transform duration-200',
-                  cardapioAtivo ? 'rotate-180' : ''
+                  cardapioOpen ? 'rotate-180' : ''
                 )}
               />
-            </Link>
+            </button>
 
-            {cardapioAtivo && (
+            {cardapioOpen && (
               <div className="ml-3 mt-0.5 pl-4 border-l border-zinc-800 space-y-0.5">
                 {cardapioItems.map(({ href, label, icon: Icon }) => (
                   <Link
