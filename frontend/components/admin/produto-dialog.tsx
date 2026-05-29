@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { ImagePlus, X, UtensilsCrossed } from 'lucide-react'
+import { ImagePlus, X, UtensilsCrossed, ChevronDown, Check } from 'lucide-react'
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter,
 } from '@/components/ui/sheet'
@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 
 interface Categoria { id: string; nome: string }
@@ -57,7 +56,18 @@ export function ProdutoDialog({ open, onOpenChange, produto, onSalvo }: Props) {
   })
   const [categorias, setCategorias] = useState<Categoria[]>([])
   const [salvando, setSalvando] = useState(false)
+  const [catOpen, setCatOpen] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
+  const catRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!catOpen) return
+    const handler = (e: MouseEvent) => {
+      if (catRef.current && !catRef.current.contains(e.target as Node)) setCatOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [catOpen])
 
   useEffect(() => {
     fetch(`${'/api'}/categorias`)
@@ -184,21 +194,35 @@ export function ProdutoDialog({ open, onOpenChange, produto, onSalvo }: Props) {
           </div>
 
           {/* Categoria */}
-          <div className="space-y-1.5">
+          <div className="space-y-1.5" ref={catRef}>
             <Label className="text-zinc-400 text-xs">Categoria *</Label>
-            <Select value={form.categoriaId} onValueChange={v => set('categoriaId', v)}>
-              <SelectTrigger className="bg-zinc-900 border-zinc-700 text-white h-10 w-full">
-                <span className="flex-1 text-sm text-left truncate">
-                  {categorias.find(c => c.id === form.categoriaId)?.nome
-                    ?? <span className="text-zinc-500">Selecionar categoria</span>}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setCatOpen(v => !v)}
+                className="w-full flex items-center justify-between bg-zinc-900 border border-zinc-700 rounded-lg h-10 px-3 text-sm text-left transition-colors hover:border-zinc-600 focus:outline-none focus:border-orange-500"
+              >
+                <span className={form.categoriaId ? 'text-white' : 'text-zinc-500'}>
+                  {categorias.find(c => c.id === form.categoriaId)?.nome ?? 'Selecionar categoria'}
                 </span>
-              </SelectTrigger>
-              <SelectContent className="bg-zinc-900 border-zinc-700">
-                {categorias.map(c => (
-                  <SelectItem key={c.id} value={c.id} className="text-white">{c.nome}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                <ChevronDown className={`h-4 w-4 text-zinc-500 transition-transform ${catOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {catOpen && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-zinc-900 border border-zinc-700 rounded-lg z-20 overflow-hidden shadow-lg">
+                  {categorias.map(c => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => { set('categoriaId', c.id); setCatOpen(false) }}
+                      className="w-full flex items-center justify-between px-3 py-2.5 text-sm text-left hover:bg-zinc-800 transition-colors"
+                    >
+                      <span className="text-white">{c.nome}</span>
+                      {form.categoriaId === c.id && <Check className="h-4 w-4 text-orange-400" />}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Descrição */}
