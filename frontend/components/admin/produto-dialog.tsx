@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { ImagePlus, X } from 'lucide-react'
+import { ImagePlus, X, UtensilsCrossed } from 'lucide-react'
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter,
 } from '@/components/ui/sheet'
@@ -117,9 +117,14 @@ export function ProdutoDialog({ open, onOpenChange, produto, onSalvo }: Props) {
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="bg-zinc-950 border-zinc-800 text-white flex flex-col p-0 w-full sm:max-w-sm">
         <SheetHeader className="p-5 border-b border-zinc-800">
-          <SheetTitle className="text-white text-base font-semibold">
-            {produto?.id ? 'Editar Produto' : 'Novo Produto'}
-          </SheetTitle>
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-lg bg-orange-500/10 flex items-center justify-center flex-shrink-0">
+              <UtensilsCrossed className="h-4 w-4 text-orange-400" />
+            </div>
+            <SheetTitle className="text-white text-base font-semibold">
+              {produto?.id ? 'Editar Produto' : 'Novo Produto'}
+            </SheetTitle>
+          </div>
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
