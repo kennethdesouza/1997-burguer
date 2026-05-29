@@ -183,6 +183,21 @@ export function ProdutoDialog({ open, onOpenChange, produto, onSalvo }: Props) {
             />
           </div>
 
+          {/* Categoria */}
+          <div className="space-y-1.5">
+            <Label className="text-zinc-400 text-xs">Categoria *</Label>
+            <Select value={form.categoriaId} onValueChange={v => set('categoriaId', v)}>
+              <SelectTrigger className="bg-zinc-900 border-zinc-700 text-white h-10 w-full">
+                <SelectValue placeholder="Selecionar categoria" />
+              </SelectTrigger>
+              <SelectContent className="bg-zinc-900 border-zinc-700">
+                {categorias.map(c => (
+                  <SelectItem key={c.id} value={c.id} className="text-white">{c.nome}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Descrição */}
           <div className="space-y-1.5">
             <Label className="text-zinc-400 text-xs">Descrição</Label>
@@ -195,31 +210,16 @@ export function ProdutoDialog({ open, onOpenChange, produto, onSalvo }: Props) {
             />
           </div>
 
-          {/* Preço + Categoria */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label className="text-zinc-400 text-xs">Preço (R$) *</Label>
-              <Input
-                value={form.preco}
-                onChange={e => set('preco', e.target.value)}
-                placeholder="0,00"
-                inputMode="decimal"
-                className="bg-zinc-900 border-zinc-700 text-white h-10"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-zinc-400 text-xs">Categoria *</Label>
-              <Select value={form.categoriaId} onValueChange={v => set('categoriaId', v)}>
-                <SelectTrigger className="bg-zinc-900 border-zinc-700 text-white h-10">
-                  <SelectValue placeholder="Selecionar" />
-                </SelectTrigger>
-                <SelectContent className="bg-zinc-900 border-zinc-700">
-                  {categorias.map(c => (
-                    <SelectItem key={c.id} value={c.id} className="text-white">{c.nome}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          {/* Preço */}
+          <div className="space-y-1.5">
+            <Label className="text-zinc-400 text-xs">Preço (R$) *</Label>
+            <Input
+              value={form.preco}
+              onChange={e => set('preco', e.target.value)}
+              placeholder="0,00"
+              inputMode="decimal"
+              className="bg-zinc-900 border-zinc-700 text-white h-10"
+            />
           </div>
 
           {/* Disponível */}
