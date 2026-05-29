@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import { getDb } from '@/lib/db'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,13 +16,10 @@ const include = {
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const db = getDb()
     const { id } = await params
     const { status } = await req.json()
-    const data = await db.pedido.update({
-      where: { id },
-      data: { status },
-      include,
-    })
+    const data = await db.pedido.update({ where: { id }, data: { status }, include })
     return NextResponse.json(data)
   } catch {
     return NextResponse.json({ error: 'Erro ao atualizar status' }, { status: 500 })

@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import { getDb } from '@/lib/db'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
+    const db = getDb()
     const data = await db.categoria.findMany({
       orderBy: { ordem: 'asc' },
       include: { _count: { select: { produtos: true } } },
@@ -17,6 +18,7 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
+    const db = getDb()
     const body = await req.json()
     const data = await db.categoria.create({ data: body })
     return NextResponse.json(data, { status: 201 })

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import { getDb } from '@/lib/db'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,6 +16,7 @@ const include = {
 
 export async function GET() {
   try {
+    const db = getDb()
     const data = await db.pedido.findMany({ orderBy: { createdAt: 'desc' }, include })
     return NextResponse.json(data)
   } catch {
@@ -25,6 +26,7 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
+    const db = getDb()
     const dto = await req.json()
 
     const ids = dto.itens.map((i: { produtoId: string }) => i.produtoId)

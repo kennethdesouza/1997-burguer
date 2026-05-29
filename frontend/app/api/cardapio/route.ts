@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import { getDb } from '@/lib/db'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
+    const db = getDb()
     const data = await db.categoria.findMany({
       where: { ativa: true },
       orderBy: { ordem: 'asc' },
