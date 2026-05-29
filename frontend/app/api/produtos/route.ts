@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 
+export const dynamic = 'force-dynamic'
+
 const include = { categoria: { select: { id: true, nome: true } } }
 
 export async function GET() {
